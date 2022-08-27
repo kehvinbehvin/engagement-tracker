@@ -1,4 +1,4 @@
-# Expense Tracker
+# Engagment Tracker
 
 # Steps to run this project without docker
 
@@ -13,7 +13,7 @@
 - docker build . -t kehvinbehvin/engagement-tracker:<commit>
 
 # Test docker image
-- docker run -p 8080:8080 -d --env-file ./.env kehvinbehvin/engagement-tracker:99fd52
+- docker run -p 8080:8080 -d --env-file ./.env kehvinbehvin/engagement-tracker:<commit>
 
 # Push image to registry
 - docker push kehvinbehvin/engagement-tracker:<commit>
