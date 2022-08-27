@@ -13,7 +13,7 @@
 - docker build . -t kehvinbehvin/engagement-tracker:<commit>
 
 # Test docker image
-- docker run -p 3000:3000 -d --env-file ./.env kehvinbehvin/engagement-tracker:latest
+- docker run -p 8080:8080 -d --env-file ./.env kehvinbehvin/engagement-tracker:99fd52
 
 # Push image to registry
 - docker push kehvinbehvin/engagement-tracker:<commit>

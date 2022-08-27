@@ -28,7 +28,7 @@ COPY --from=ts-compiler /usr/src/app/build ./build
 
 RUN npm install --only=production
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD [ "node", "./build/app.js" ]
 
