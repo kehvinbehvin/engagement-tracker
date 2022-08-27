@@ -18,7 +18,7 @@ COPY ./src ./src
 
 RUN npm run build
 
-FROM node:18-alpine3.15 as ts-remover
+FROM amd64/node:18-alpine3.15 as ts-remover
 
 WORKDIR /usr/src/app
 
