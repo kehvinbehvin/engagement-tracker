@@ -1,4 +1,4 @@
-FROM node:18-alpine3.15 as ts-compiler
+FROM amd64/node:18-alpine3.15 as ts-compiler
 
 # Create app directory
 WORKDIR /usr/src/app
