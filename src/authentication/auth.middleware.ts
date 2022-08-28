@@ -1,16 +1,18 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 import {Request, Response, NextFunction} from "express";
+import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestError";
+import { HTTPAccessDeniedError, } from "../utils/error_handling/src/HTTPAccessDeniedError";
 
 async function verify(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization;
 
     if (!token) {
-        return res.status(403).send("A token is required for authentication");
+        return next(new HTTPAccessDeniedError("You are not authenticated"));
     }
 
     if (token.split(' ')[0] !== 'Bearer') {
-        return res.status(403).send("Wrong authentication method");
+        return next(new HTTPBadRequestError("Wrong authentication method"));
     }
 
     const tokenValue = token.split(' ')[1];
@@ -18,7 +20,7 @@ async function verify(req: Request, res: Response, next: NextFunction) {
         const decoded = jwt.verify(tokenValue, process.env.TOKEN_KEY);
         res.locals.currentUserId = decoded.user_id
     } catch (err) {
-        return res.status(401).send("Invalid Token");
+        return next(new HTTPAccessDeniedError("Invalid Token"));
     }
     return next();
 }

@@ -1,26 +1,24 @@
-import {NextFunction, Request, Response} from "express";
-import httpStatusCodes from "../utils/error_handling/configs/httpStatusCodes";
-import {HTTPBadRequestError} from "../utils/error_handling/src/HTTPBadRequestError";
-import { completeKeys } from "../utils/utils"
-import userLogger from "./user.logger";
-
-import { getUserById, createUser, updateUser, removeUser, getUserByEmail, login } from "./user.manager"
-import { HTTPAccessDeniedError } from "../utils/error_handling/src/HTTPAccessDeniedError";
-
+import userLogger from "./user.logger"
+import { Request, Response, NextFunction } from 'express';
+import { getUserById, createUser, removeUser, updateUser, getUserByEmail, login } from "./user.manager"
+import { completeKeys, isWhiteListed } from "../utils/utils"
+import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestError"
+import { HTTPAccessDeniedError } from "../utils/error_handling/src/HTTPAccessDeniedError"
+import { HTTPNotFoundError } from "../utils/error_handling/src/HTTPNotFoundError"
+import httpStatusCodes from "../utils/error_handling/configs/httpStatusCodes"
+import pick from "lodash.pick"
 
 export async function getUser(req: Request, res: Response, next: NextFunction) {
     try {
-        if (!res.locals.currentUser) {
-            return next(new HTTPAccessDeniedError("You need to be authenticated"));
-        }
-
-        const userId = Number(req.params.id);
+        const userId = Number(res.locals.currentUserId);
         const user = await getUserById(userId);
 
         userLogger.log("info",`Retrieved user id: ${userId}`);
+        
+        const publicFields = ["firstName", "lastName", "email"]
+        const publicUserData = pick(user, publicFields);
 
-        return res.json(user);
-
+        return res.json(publicUserData);
     } catch (error: any) {
         userLogger.log("error", error);
         return next(error);
@@ -31,13 +29,22 @@ export async function registerUser(req: Request, res: Response, next: NextFuncti
     try {
         const data = req.body;
 
-        const keyFields = ["firstName", "lastName","email","password"];
+        const keyFields = ["firstName", "lastName", "email", "password"];
+        
+        userLogger.log("debug", {
+            "message": req.body
+        })
 
         if (!completeKeys(keyFields,data)) {
             return next(new HTTPBadRequestError("Incomplete data"));
         }
 
-        // TODO Add check for existing users with same email
+        const existingUser = await getUserByEmail(data.email);
+       
+        if (existingUser !== null) {
+            return next(new HTTPBadRequestError("Email taken"));
+        }
+
         const user = await createUser(data);
 
         userLogger.log("info",`${user.email} created`);
@@ -48,8 +55,7 @@ export async function registerUser(req: Request, res: Response, next: NextFuncti
         }
 
         return res.json(response).status(httpStatusCodes.OK);
-
-    } catch (error) {
+    } catch (error: any) {
         userLogger.log("error", error);
         return next(error);
     }
@@ -57,11 +63,7 @@ export async function registerUser(req: Request, res: Response, next: NextFuncti
 
 export async function deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-        const userId = Number(req.params.id);
-
-        if (!res.locals.currentUser) {
-            return next(new HTTPAccessDeniedError("You need to be authenticated"));
-        }
+        const userId = Number(res.locals.currentUserId);
         
         const removedUser = await removeUser(userId);
 
@@ -73,28 +75,27 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
         }
     
         return res.json(response).status(httpStatusCodes.OK);
-
     } catch (error: any) {
         userLogger.log("error", error);
         return next(error);
-    }  
+    }
 }
 
 export async function patchUser(req: Request, res: Response, next: NextFunction) {
     try {
         const data = req.body;
 
-        const keyFields = ["id", "firstName", "lastName","email","password"];
-    
-        if (!completeKeys(keyFields,data)) {
-            return next(new HTTPBadRequestError("Incomplete data"));
-        }
+        const keyFields = ["firstName", "lastName", "email"];
 
-        if (!res.locals.currentUser) {
-            return next(new HTTPAccessDeniedError("You need to be authenticated"));
+        const invalidKeys = isWhiteListed(keyFields,data);
+    
+        if (invalidKeys.length > 0) {
+            return res.status(httpStatusCodes.BAD_REQUEST).json({
+                "Invalid keys": invalidKeys
+            })
         }
     
-        const userId = Number(data.id);
+        const userId = Number(res.locals.currentUserId);
         const user = await getUserById(userId);
         const updatedUser = await updateUser(user, data);
 
@@ -106,25 +107,27 @@ export async function patchUser(req: Request, res: Response, next: NextFunction)
         }
     
         return res.json(response).status(httpStatusCodes.OK);
-
     } catch (error: any) {
         userLogger.log("error", error);
         return next(error);
     }
-    
 }
 
 export async function profilelogin(req: Request, res: Response, next: NextFunction) {
     try {
         const data = req.body;
 
-        const keyFields = ["email","password"];
+        const keyFields = ["email", "password"];
 
         if (!completeKeys(keyFields,data)) {
             return next(new HTTPBadRequestError("Incomplete data"));
         }
 
         const user = await getUserByEmail(data.email);
+
+        if (!user) {
+            return next(new HTTPNotFoundError(`User ${data.email} does not exist`));
+        }
 
         const token = await login(user, data.password);
 
@@ -139,10 +142,18 @@ export async function profilelogin(req: Request, res: Response, next: NextFuncti
         }
 
         return res.json(response).status(httpStatusCodes.OK);
-
     } catch (error: any) {
         userLogger.log("error", error);
         return next(error);
     }
 }
 
+export async function healthCheck(req: Request, res: Response, next: NextFunction) {
+    const response = {
+        "status": "healthy",
+    }
+
+    userLogger.log("info",`Health checked`);
+
+    return res.json(response).status(httpStatusCodes.OK);
+}

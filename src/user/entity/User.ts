@@ -1,8 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToOne, JoinColumn } from "typeorm"
-import { Profile } from "../../user_profile/entity/User_profile"
 
-@Entity({name: "adminuser"})
-export class AdminUser extends BaseEntity {
+@Entity({name: "user"})
+export class User extends BaseEntity {
 
     @PrimaryGeneratedColumn()
     id: number
@@ -19,7 +18,7 @@ export class AdminUser extends BaseEntity {
     @Column("varchar", { nullable: true, length: 200 })
     password: string
 
-    @OneToOne(() => Profile)
-    @JoinColumn()
-    profile: Profile
+    @Column("boolean", { nullable: true, default: false })
+    deleted: boolean
+
 }

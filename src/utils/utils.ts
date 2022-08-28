@@ -7,13 +7,16 @@ function completeKeys(keyFields: string[], data: object) {
     return true;
 }
 
-function isWhiteListed(keyFields: string[], data: string[]) {
-    for (const item of data) {
-        if (!keyFields.includes(item)) {
-            return false;
+function isWhiteListed(keyFields: string[], data: object) {
+    const invalidKeys: string[] = []
+    for (const field in data) {
+        if (!keyFields.includes(field)) {
+            invalidKeys.push(field);
         }
     }
-    return true;
+
+    return invalidKeys;
 }
+
 
 export { completeKeys, isWhiteListed }
