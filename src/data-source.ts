@@ -28,12 +28,7 @@ function getDataSource() {
             entities: [],
             migrations: [],
             subscribers: [],
-            ssl: true,
-            extra: {
-                ssl: {
-                    rejectUnauthorized: false
-                }
-            }
+            ssl: false,
         })
     }
 }
