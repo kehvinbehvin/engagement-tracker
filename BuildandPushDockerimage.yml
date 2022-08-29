@@ -13,6 +13,7 @@
     settable: true
     description: "Docker tag"
   - key: "LATESTCOMMITHASH"
+    value: "03dbbe8"
     type: "VAR"
     settable: true
     description: "LATEST COMMIT HASH"
@@ -34,6 +35,6 @@
     target_platform: "linux/amd64"
   - action: "Push Docker image"
     type: "DOCKER_PUSH"
-    docker_image_tag: "$LATESTCOMMITHASH"
+    docker_image_tag: "latest,$LATESTCOMMITHASH"
     repository: "kehvinbehvin/engagement-tracker"
     integration_hash: "3qM15wNJAPdRkJwVeGyOXpZKnW"
