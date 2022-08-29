@@ -23,7 +23,7 @@
     docker_image_name: "library/ubuntu"
     docker_image_tag: "18.04"
     execute_commands:
-    - "export LATESTCOMMITHASH=$(.git/ORIG_HEAD | head -c 7)"
+    - "export LATESTCOMMITHASH=$(cat .git/ORIG_HEAD | head -c 7)"
     volume_mappings:
     - "/:/buddy/engagement-tracker"
     cache_base_image: true
@@ -32,11 +32,6 @@
     type: "DOCKERFILE"
     dockerfile_path: "Dockerfile"
     target_platform: "linux/amd64"
-  - action: "Push Docker image"
-    type: "DOCKER_PUSH"
-    docker_image_tag: "latest"
-    repository: "kehvinbehvin/engagement-tracker"
-    integration_hash: "3qM15wNJAPdRkJwVeGyOXpZKnW"
   - action: "Push Docker image"
     type: "DOCKER_PUSH"
     docker_image_tag: "$LATESTCOMMITHASH"
