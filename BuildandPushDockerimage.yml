@@ -1,0 +1,44 @@
+- pipeline: "Build and Push Docker image"
+  on: "EVENT"
+  events:
+  - type: "PUSH"
+    refs:
+    - "refs/heads/master"
+  priority: "NORMAL"
+  fail_on_prepare_env_warning: true
+  variables:
+  - key: "DOCKERTAG"
+    value: "latest"
+    type: "VAR"
+    settable: true
+    description: "Docker tag"
+  - key: "LATESTCOMMITHASH"
+    type: "VAR"
+    settable: true
+    description: "LATEST COMMIT HASH"
+  actions:
+  - action: "Execute: export LATESTCOMMITHASH=$(git log --pretty=format:'%h' -n 1)"
+    type: "BUILD"
+    working_directory: "/buddy/engagement-tracker"
+    docker_image_name: "library/ubuntu"
+    docker_image_tag: "18.04"
+    execute_commands:
+    - "export LATESTCOMMITHASH=$(git log --pretty=format:'%h' -n 1)"
+    volume_mappings:
+    - "/:/buddy/engagement-tracker"
+    cache_base_image: true
+    shell: "BASH"
+  - action: "Build Docker image"
+    type: "DOCKERFILE"
+    dockerfile_path: "Dockerfile"
+    target_platform: "linux/amd64"
+  - action: "Push Docker image"
+    type: "DOCKER_PUSH"
+    docker_image_tag: "latest"
+    repository: "kehvinbehvin/engagement-tracker"
+    integration_hash: "3qM15wNJAPdRkJwVeGyOXpZKnW"
+  - action: "Push Docker image"
+    type: "DOCKER_PUSH"
+    docker_image_tag: "$LATESTCOMMITHASH"
+    repository: "kehvinbehvin/engagement-tracker"
+    integration_hash: "3qM15wNJAPdRkJwVeGyOXpZKnW"
