@@ -23,6 +23,7 @@
     docker_image_name: "library/ubuntu"
     docker_image_tag: "18.04"
     execute_commands:
+    - "sudo apt install git-all"
     - "export LATESTCOMMITHASH=$(git log --pretty=format:'%h' -n 1)"
     volume_mappings:
     - "/:/buddy/engagement-tracker"
