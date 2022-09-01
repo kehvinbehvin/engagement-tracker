@@ -14,11 +14,18 @@ import userRoutes from "./user/user.routes"
 // Middleware
 import errorHandler from "./utils/error_handling/errorHandler.middleware"
 import routeLogger from "./utils/logger/src/routeLogger.middleware";
+var cors = require('cors')
 
 
 const app: Express = express();
 const port = process.env.PORT;
 
+var corsOptions = {
+    origin: 'http://localhost:8081',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  }
+
+app.use(cors());
 app.use(express.json());
 app.use(routeLogger);
 app.use(errorHandler);
