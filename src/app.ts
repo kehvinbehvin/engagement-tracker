@@ -40,4 +40,5 @@ AppDataSource.initialize().then(async () => {
 
 app.listen(port, () => {
     logger.log("info",`Server is running on port ${port}`);
+    logger.log("info",`Server listening to nginx at ${nginxHost}`)
 });
