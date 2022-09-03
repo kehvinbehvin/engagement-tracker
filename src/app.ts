@@ -19,9 +19,10 @@ var cors = require('cors')
 
 const app: Express = express();
 const port = process.env.PORT;
+const nginxHost = process.env.NGINX_HOST;
 
 var corsOptions = {
-    origin: 'http://nginx',
+    origin: nginxHost,
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
   }
 
