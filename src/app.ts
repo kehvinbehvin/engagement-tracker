@@ -21,7 +21,7 @@ const app: Express = express();
 const port = process.env.PORT;
 
 var corsOptions = {
-    origin: ["https://engagement-core-nginx.fly.dev","http://localhost/3000"],
+    origin: ["http://localhost:3000"],
     optionsSuccessStatus: 200 
   }
 
