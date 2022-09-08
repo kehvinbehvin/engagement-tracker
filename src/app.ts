@@ -21,11 +21,11 @@ const app: Express = express();
 const port = process.env.PORT;
 
 var corsOptions = {
-    origin: 'http://localhost:8081',
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    origin: '*',
+    optionsSuccessStatus: 200 
   }
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(routeLogger);
 app.use(errorHandler);
