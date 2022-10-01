@@ -97,6 +97,12 @@ async function setNewcomerData(newcomer: Newcomer, data: Newcomer): Promise<Newc
     }
 
     if (data.status) {
+        const keys = Object.keys(NewcomerStatus).filter((v) => isNaN(Number(v)));
+        
+        if (!keys.includes(data.status.toUpperCase())) {
+            throw new HTTPBadRequestError("Invalid newcomer status")
+        }
+        
         newcomer.status = data.status
     }
 
