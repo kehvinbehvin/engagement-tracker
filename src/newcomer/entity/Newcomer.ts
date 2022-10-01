@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToOne, JoinColumn } from "typeorm"
+import { Activity } from "../../activity/entity/Activity"
 
 export enum NewcomerStatus {
     VISITING = "visiting",
@@ -21,6 +22,10 @@ export class Newcomer extends BaseEntity {
 
     @Column("varchar", { nullable: true, length: 200 })
     email: string
+
+    @OneToOne(() => Activity)
+    @JoinColumn()
+    activity: Activity
     
     @Column("enum", { enum: NewcomerStatus, default: NewcomerStatus.NEW })
     status: string

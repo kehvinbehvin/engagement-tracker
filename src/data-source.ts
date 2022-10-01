@@ -2,6 +2,7 @@ import "reflect-metadata"
 import { DataSource } from "typeorm"
 import { User } from "./user/entity/User"
 import { Newcomer } from "./newcomer/entity/Newcomer"
+import { Activity } from "./activity/entity/Activity"
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -26,7 +27,7 @@ function getDataSource() {
             database: DB_DATABASE_POSTGRES,
             synchronize: true,
             logging: true,
-            entities: [User, Newcomer],
+            entities: [User, Newcomer, Activity],
             subscribers: [],
             migrations: [],
         })
@@ -36,7 +37,7 @@ function getDataSource() {
             url: DATABASE_URL,
             synchronize: true,
             logging: true,
-            entities: [User, Newcomer],
+            entities: [User, Newcomer, Activity],
             migrations: [],
             subscribers: [],
         })
