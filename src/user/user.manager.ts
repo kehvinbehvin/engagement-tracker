@@ -114,6 +114,9 @@ async function setUserData(user: User, data: User): Promise<User> {
     
     if (data.email) {
         const existingUser = await getUserByEmail(data.email);
+
+        // TODO Need to perform validation if the email is valid.
+
         if (existingUser !== null && (existingUser.id !== user.id)) {
             throw new HTTPBadRequestError("Email taken")
         }
