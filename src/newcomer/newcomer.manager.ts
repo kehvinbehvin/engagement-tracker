@@ -71,7 +71,8 @@ export async function removeNewcomerTask(newcomerId: number): Promise<Newcomer> 
     }
 }
 
-export async function updateNewcomerTask(newcomer: Newcomer, data: Newcomer): Promise<Newcomer> {
+export async function updateNewcomerTask(newcomer: Newcomer, data: Newcomer, newcomerId: number): Promise<Newcomer> {
+    data["id"] = newcomerId;
     return setNewcomerData(newcomer, data);
 }
 
@@ -89,7 +90,7 @@ async function setNewcomerData(newcomer: Newcomer, data: Newcomer): Promise<Newc
 
         // TODO Need to perform validation if the email is valid.
 
-        if (existingNewcomer !== null && (existingNewcomer.email !== data.email)) {
+        if (existingNewcomer !== null && (existingNewcomer.id !== data.id)) {
             throw new HTTPBadRequestError("Email taken")
         }
 
