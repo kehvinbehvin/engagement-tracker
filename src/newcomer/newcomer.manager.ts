@@ -1,9 +1,10 @@
 import { AppDataSource } from "../data-source"
-import { Newcomer } from "../newcomer/entity/Newcomer"
+import { Newcomer, NewcomerStatus } from "../newcomer/entity/Newcomer"
 import { HTTPNotFoundError } from "../utils/error_handling/src/HTTPNotFoundError"
 import { HTTPInternalSeverError } from "../utils/error_handling/src/HTTPInternalSeverError"
 import newcomerLogger from "./newcomer.logger"
 import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestError"
+
 
 const newcomerRepository = AppDataSource.getRepository(Newcomer);
 
@@ -88,7 +89,7 @@ async function setNewcomerData(newcomer: Newcomer, data: Newcomer): Promise<Newc
 
         // TODO Need to perform validation if the email is valid.
 
-        if (existingNewcomer !== null && (existingNewcomer.id !== data.id)) {
+        if (existingNewcomer !== null && (existingNewcomer.email !== data.email)) {
             throw new HTTPBadRequestError("Email taken")
         }
 
