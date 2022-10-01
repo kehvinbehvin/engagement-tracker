@@ -6,7 +6,7 @@ function newcomerRoutes(app: Express.Application) {
     app.get("/api/v0/newcomer/:id", verify, getNewcomer)
     app.delete("/api/v0/newcomer/:id", verify, deleteNewcomer)
     app.patch("/api/v0/newcomer/:id", verify, patchNewcomer)
-    app.post("/api/v0/newcomer/:id", verify, createNewcomer)
+    app.post("/api/v0/newcomer", verify, createNewcomer)
 }
 
 export default newcomerRoutes;
