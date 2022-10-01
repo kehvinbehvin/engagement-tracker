@@ -15,7 +15,7 @@ export async function getNewcomer(req: Request, res: Response, next: NextFunctio
 
         newcomerLogger.log("info",`Retrieved newcomer id: ${newcomerId}`);
         
-        const publicFields = ["firstName", "lastName", "email"]
+        const publicFields = ["firstName", "lastName", "email", "status"]
         const publicNewcomerData = pick(newcomer, publicFields);
 
         return res.json(publicNewcomerData);
