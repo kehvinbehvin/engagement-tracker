@@ -18,9 +18,12 @@ export class Newcomer extends BaseEntity {
 
     @Column("varchar", { nullable: true, length: 200 })
     lastName: string
+
+    @Column("varchar", { nullable: true, length: 200 })
+    email: string
     
     @Column("enum", { enum: NewcomerStatus, default: NewcomerStatus.NEW })
-    integrated: string
+    status: string
 
     @Column("boolean", { nullable: true, default: false })
     deleted: boolean
