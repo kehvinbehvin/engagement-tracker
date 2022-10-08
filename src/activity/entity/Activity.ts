@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, OneToMany, OneToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToMany, OneToMany, OneToOne } from "typeorm"
 import { Newcomer } from "../../newcomer/entity/Newcomer"
 import { User } from "../../user/entity/User"
 
@@ -21,12 +21,12 @@ export class Activity extends BaseEntity {
     activityDate: string // 'YYYY-MM-DD hh:mm:ss'
     
     @Column("enum", { enum: ActivityType, default: ActivityType.BLANK })
-    status: string
+    type: string
 
     @OneToOne(() => Newcomer, (newcomer) => newcomer.activity)
     newcomer: Newcomer
 
-    @OneToMany(() => User, (user) => user.activity)
+    @ManyToMany(() => User, (user) => user.activity)
     admins: User[]
 }
 
