@@ -32,6 +32,21 @@ export async function getUserById(id: number): Promise<User> {
     }
 }
 
+export async function getMultipleUserByIds(ids: number[]): Promise<User[]> {
+    try {
+        const users = await userRepository
+        .createQueryBuilder("getMultipleUserByIds")
+        .where("user.id = :id", ids)
+        .getMany()
+        
+        return users
+    } catch(error: any) {
+        userLogger.log("error",`${error}`);
+        throw new HTTPInternalSeverError("Error when finding users by ids");
+        
+    }
+}
+
 export async function createUser(data: User): Promise<User> {
     try {
         const user = new User()
