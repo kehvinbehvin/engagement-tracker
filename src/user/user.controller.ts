@@ -1,12 +1,13 @@
 import userLogger from "./user.logger"
 import { Request, Response, NextFunction } from 'express';
-import { getUserById, createUser, removeUser, updateUser, getUserByEmail, login } from "./user.manager"
+import { getUserById, createUser, removeUser, updateUser, getUserByEmail, login, getMultipleUserByIds } from "./user.manager"
 import { completeKeys, isWhiteListed } from "../utils/utils"
 import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestError"
 import { HTTPAccessDeniedError } from "../utils/error_handling/src/HTTPAccessDeniedError"
 import { HTTPNotFoundError } from "../utils/error_handling/src/HTTPNotFoundError"
 import httpStatusCodes from "../utils/error_handling/configs/httpStatusCodes"
 import pick from "lodash.pick"
+import userRoutes from "./user.routes";
 
 export async function getUser(req: Request, res: Response, next: NextFunction) {
     try {
@@ -23,6 +24,28 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
         userLogger.log("error", error);
         return next(error);
     }
+}
+
+export async function getUsers(req: Request, res: Response, next: NextFunction) {
+    const data = req.body;
+
+    const keyFields = ["userIds"];
+
+    if (!completeKeys(keyFields,data)) {
+        return next(new HTTPBadRequestError("Incomplete data"));
+    }
+
+    const selectOptions = {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        activity: true,
+    }
+
+    const users = await getMultipleUserByIds(data.userIds, selectOptions);
+
+    return res.json(users).status(httpStatusCodes.OK);
 }
 
 export async function registerUser(req: Request, res: Response, next: NextFunction) {
@@ -157,3 +180,4 @@ export async function healthCheck(req: Request, res: Response, next: NextFunctio
 
     return res.json(response).status(httpStatusCodes.OK);
 }
+
