@@ -72,11 +72,9 @@ export async function patchActivityByIdTask(activityId: number, data: ActivityRe
     try {
         const activity = await getActivityByIdTask(activityId);
 
-        const updateActivity = await setActivityData(activity, data);
+        const updatedActivity = await setActivityData(activity, data);
 
-        await activityRepository.save(updateActivity)
-
-        return activity;
+        return updatedActivity;
 
     } catch(error: any) {
         activityLogger.log("error",`${error}`);
@@ -91,7 +89,6 @@ async function setActivityData(activity: Activity, data: ActivityRequest) {
         const newcomerId = data.newcomerId
         const newcomer = await getNewcomerByIdTask(newcomerId);
         activity.newcomer = [newcomer]
-        
     }
 
     if (data.type) {
@@ -106,11 +103,7 @@ async function setActivityData(activity: Activity, data: ActivityRequest) {
 
     if (data.activityDate) {
         activity.activityDate = data.activityDate;
-        
     }
-
-    await activityRepository.save(activity);
-    activityLogger.log("info",`Saved normal columns`);
 
     // Relationships
     if (data.adminIds) {
@@ -118,14 +111,15 @@ async function setActivityData(activity: Activity, data: ActivityRequest) {
         const admins = await getMultipleUserByIds(adminIds);
 
         activity.admins = admins
-
-        activityLogger.log("info",`Saving activity admins`);
-        
-        // Only need to save one side of the many to many relationship.
-        // Intially looped through the different users to save the admin relationship to
-        // but it resulted in all other activities having their admins removed. 
-        await activityRepository.save(activity);
     }
 
-    return activity;
+    try {
+        const updatedActivity = await activityRepository.save(activity);
+
+        return updatedActivity;
+
+    } catch (error: any) {
+        activityLogger.log("error",`${error}`);
+        throw new HTTPInternalSeverError("Error when setting activity data");
+    }
 }
