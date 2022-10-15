@@ -31,6 +31,21 @@ export async function createNewActivityTask(data: ActivityRequest): Promise<Acti
 export async function getActivityByIdTask(activtyId: number): Promise<Activity> {
     try {
         const activity = await activityRepository.findOne({
+            select: {
+                id: true,
+                admins: {
+                    id: true,
+                    firstName: true,
+                    email: true,
+                },
+                newcomer: {
+                    id: true,
+                    firstName: true,
+                    email: true,
+                },
+                activityDate: true,
+                type: true,
+            },
             where: {
                 id: activtyId,
                 deleted: false,
@@ -38,7 +53,7 @@ export async function getActivityByIdTask(activtyId: number): Promise<Activity> 
             relations: {
                 admins: true,
                 newcomer: true,
-            },
+            }
         })
 
         if (!activity) {
@@ -86,7 +101,7 @@ async function setActivityData(activity: Activity, data: ActivityRequest) {
         const admins = await getMultipleUserByIds(adminIds);
 
         activity.admins = admins
-        
+
         activityLogger.log("info",`Saving activity admins`);
 
         await activityRepository.save(activity);
