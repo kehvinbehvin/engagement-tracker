@@ -98,7 +98,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     }
 }
 
-export async function login(user: User, password: string): Promise<string | null> {
+export async function login(user: User, password: string): Promise<object | null> {
     try {
         const successfulLogin = await bcrypt.compare(password, user.password);
         if (!successfulLogin) {
@@ -113,13 +113,88 @@ export async function login(user: User, password: string): Promise<string | null
             }
         );
 
-        return token
+        const refreshtoken = jwt.sign(
+            { user_id: user.id },
+            process.env.TOKEN_KEY,
+            {
+                expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+            }
+        )
+
+        const storeUserToken = updateRefreshToken(user.id, refreshtoken)
+
+        if (!storeUserToken) {
+            throw new HTTPInternalSeverError("Error while saving refresh token to user");
+        }
+
+        return {
+            "Access token": token,
+            "Refresh token": refreshtoken
+        }
 
     } catch (error: any) {
         userLogger.log("error",`${error}`);
         throw new HTTPInternalSeverError("Error during login");
     }
     
+}
+
+export async function refresh(refreshToken: string): Promise<object | null> {
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.TOKEN_KEY);
+        const userId = decoded.user_id
+        const user = await getUserById(userId);
+        
+        if (refreshToken !== user.refreshToken) {
+            throw new HTTPInternalSeverError("Suspicious activity");
+        }
+
+        const token = jwt.sign(
+            { user_id: userId },
+            process.env.TOKEN_KEY,
+            {
+                expiresIn: process.env.TOKEN_EXPIRY,
+            }
+        );
+
+        const refreshtoken = jwt.sign(
+            { user_id: userId },
+            process.env.TOKEN_KEY,
+            {
+                expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+            }
+        )
+
+        const storeUserToken = updateRefreshToken(userId, refreshtoken)
+
+        if (!storeUserToken) {
+            throw new HTTPInternalSeverError("Error while saving refresh token to user");
+        }
+
+        return {
+            "Access token": token,
+            "Refresh token": refreshtoken
+        }
+        
+    } catch (error: any) {
+        userLogger.log("error",`${error}`);
+        throw error;
+    }
+}
+
+async function updateRefreshToken(userId: number, refreshToken: string): Promise<User> {
+    try {
+        const user = await getUserById(userId);
+        user.refreshToken = refreshToken;
+
+        const updatedUser = await userRepository.save(user);
+
+        return updatedUser;
+
+    } catch (error: any) {
+        userLogger.log("error",`${error}`);
+        throw new HTTPInternalSeverError("Error while saving refresh token");
+    }
 }
 
 async function setUserData(user: User, data: User): Promise<User> {

@@ -1,5 +1,5 @@
 import Express from "express";
-import { getUser, registerUser, deleteUser, patchUser, profilelogin, healthCheck, getUsers } from "./user.controller"
+import { getUser, registerUser, deleteUser, patchUser, profilelogin, healthCheck, getUsers, refreshToken } from "./user.controller"
 import { verify } from "../authentication/auth.middleware"
 
 function userRoutes(app: Express.Application) {
@@ -9,6 +9,7 @@ function userRoutes(app: Express.Application) {
     app.patch("/api/v0/user", verify, patchUser)
     app.post("/api/v0/register", registerUser)
     app.post("/api/v0/login", profilelogin)
+    app.post("/api/v0/refresh-token", refreshToken)
     app.post("/api/v0/users",getUsers)
 }
 

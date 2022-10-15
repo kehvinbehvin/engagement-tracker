@@ -19,6 +19,9 @@ export class User extends BaseEntity {
     @Column("varchar", { nullable: true, length: 200 })
     password: string
 
+    @Column("varchar", { nullable: true, length: 200 })
+    refreshToken: string
+
     @ManyToMany(() => Activity, (activity) => activity.admins)
     activity: Activity[]
 
