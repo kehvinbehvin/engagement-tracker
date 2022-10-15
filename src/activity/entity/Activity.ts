@@ -29,5 +29,8 @@ export class Activity extends BaseEntity {
     @ManyToMany(() => User, (admins) => admins.activity)
     @JoinTable()
     admins: User[]
+
+    @Column("boolean", { nullable: true, default: false })
+    deleted: boolean
 }
 

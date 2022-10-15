@@ -33,6 +33,7 @@ export async function getActivityByIdTask(activtyId: number): Promise<Activity> 
         const activity = await activityRepository.findOne({
             where: {
                 id: activtyId,
+                deleted: false,
             },
             relations: {
                 admins: true,
