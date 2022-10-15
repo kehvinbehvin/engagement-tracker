@@ -85,11 +85,8 @@ async function setActivityData(activity: Activity, data: ActivityRequest) {
         const adminIds = data.adminIds
         const admins = await getMultipleUserByIds(adminIds);
 
-        if (activity.admins) {
-            activity.admins.push(...admins)
-        } else {
-            activity.admins = admins
-        }
+        activity.admins = admins
+        
         activityLogger.log("info",`Saving activity admins`);
 
         await activityRepository.save(activity);
@@ -97,11 +94,7 @@ async function setActivityData(activity: Activity, data: ActivityRequest) {
         for (const admin of admins) {
             activityLogger.log("info",`Saving admin side${activity.id}`);
             try {
-                if (admin.activity) {
-                    admin.activity.push(activity);
-                } else {
-                    admin.activity = [activity];
-                }
+                admin.activity = [activity];
                 
                 await userRepository.save(admin);
 
