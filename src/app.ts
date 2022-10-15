@@ -11,6 +11,7 @@ import { AppDataSource } from "./data-source";
 // Routes
 import userRoutes from "./user/user.routes"
 import newcomerRoutes from "./newcomer/newcomer.routes"
+import activityRoutes from "./activity/activity.routes"
 
 // Middleware
 import errorHandler from "./utils/error_handling/errorHandler.middleware"
@@ -34,6 +35,7 @@ app.use(errorHandler);
 
 userRoutes(app)
 newcomerRoutes(app)
+activityRoutes(app)
 
 AppDataSource.initialize().then(async () => {
     logger.log("info","Database connected")

@@ -4,6 +4,7 @@ import { HTTPNotFoundError } from "../utils/error_handling/src/HTTPNotFoundError
 import { HTTPInternalSeverError } from "../utils/error_handling/src/HTTPInternalSeverError"
 import userLogger from "./user.logger"
 import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestError"
+import { In } from "typeorm"
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -29,6 +30,24 @@ export async function getUserById(id: number): Promise<User> {
     } catch(error: any) {
         userLogger.log("error",`${error}`);
         throw new HTTPInternalSeverError("Error when finding user by id");
+    }
+}
+
+export async function getMultipleUserByIds(ids: Number[], selectOptions: Object = {}): Promise<User[]> {
+    try {
+        const users = await userRepository.find({
+            select: selectOptions,
+            where: {
+                id: In(ids),
+                deleted: false,
+            }
+        })
+        
+        return users
+    } catch(error: any) {
+        userLogger.log("error",`${error}`);
+        throw new HTTPInternalSeverError("Error when finding users by ids");
+
     }
 }
 

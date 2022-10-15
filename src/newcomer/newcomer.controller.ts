@@ -62,7 +62,7 @@ export async function patchNewcomer(req: Request, res: Response, next: NextFunct
         }
     
         const newcomer = await getNewcomerByIdTask(newcomerId);
-        const updatedNewcomer = await updateNewcomerTask(newcomer, data);
+        const updatedNewcomer = await updateNewcomerTask(newcomer, data, newcomerId);
 
         newcomerLogger.log("info",`Updated newcomer id: ${updatedNewcomer.id}`)
 
