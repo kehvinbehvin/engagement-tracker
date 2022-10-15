@@ -5,7 +5,7 @@ import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestE
 import { HTTPAccessDeniedError } from "../utils/error_handling/src/HTTPAccessDeniedError"
 import { HTTPNotFoundError } from "../utils/error_handling/src/HTTPNotFoundError"
 import httpStatusCodes from "../utils/error_handling/configs/httpStatusCodes"
-import { getNewcomerByEmailTask, createNewcomerTask, getNewcomerByIdTask, removeNewcomerTask, updateNewcomerTask } from "./newcomer.manager"
+import { getNewcomerByEmailTask, createNewcomerTask, getNewcomerByIdTask, removeNewcomerTask, updateNewcomerTask, getNewcomersTask, searchNewcomersTask } from "./newcomer.manager"
 import pick from "lodash.pick"
 
 export async function getNewcomer(req: Request, res: Response, next: NextFunction) {
@@ -19,6 +19,29 @@ export async function getNewcomer(req: Request, res: Response, next: NextFunctio
         const publicNewcomerData = pick(newcomer, publicFields);
 
         return res.json(publicNewcomerData);
+    } catch (error: any) {
+        newcomerLogger.log("error", error);
+        return next(error);
+    }
+}
+
+export async function searchNewcomers(req: Request, res: Response, next: NextFunction) {
+    try {
+        const offset = typeof req.query.offset === "string" ? parseInt(req.query.offset) : 0
+        const limit = typeof req.query.limit === "string" ? parseInt(req.query.limit) : 10
+        const searchFilter = typeof req.query.filter === "string" ? req.query.filter : ""
+        const searchQuery = typeof req.query.searchQuery === "string" ? req.query.searchQuery : ""
+
+        let results = {};
+
+        if (searchFilter === "none") {
+            results = await getNewcomersTask(offset, limit); 
+        } else if (searchFilter === "fulltext") {
+            results = await searchNewcomersTask(offset, limit, searchQuery);
+        }
+
+        return res.json(results);
+        
     } catch (error: any) {
         newcomerLogger.log("error", error);
         return next(error);

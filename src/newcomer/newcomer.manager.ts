@@ -4,6 +4,7 @@ import { HTTPNotFoundError } from "../utils/error_handling/src/HTTPNotFoundError
 import { HTTPInternalSeverError } from "../utils/error_handling/src/HTTPInternalSeverError"
 import newcomerLogger from "./newcomer.logger"
 import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestError"
+import { ILike } from "typeorm"
 
 
 const newcomerRepository = AppDataSource.getRepository(Newcomer);
@@ -39,6 +40,39 @@ export async function getNewcomerByEmailTask(email: string): Promise<Newcomer | 
     } catch (error: any) {
         newcomerLogger.log("error",`${error}`);
         throw new HTTPInternalSeverError("Error while getting newcomer by email");
+    }
+}
+
+export async function getNewcomersTask(offset: number, limit: number) {
+    const [newcomers , total] = await newcomerRepository.findAndCount({
+        order: {
+            id: 'DESC'
+        },
+        skip: offset,
+        take: limit
+    })
+
+    return {
+        data: newcomers,
+        count: total
+    }
+}
+
+export async function searchNewcomersTask(offset: number, limit: number, searchQuery: string) {
+    const [newcomers , total] = await newcomerRepository.findAndCount({
+        order: {
+            id: 'DESC'
+        },
+        where: {
+            firstName: ILike(`%${searchQuery}%`)
+        },
+        skip: offset,
+        take: limit
+    })
+
+    return {
+        data: newcomers,
+        count: total
     }
 }
 
