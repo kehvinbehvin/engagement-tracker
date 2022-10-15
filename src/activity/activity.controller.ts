@@ -5,10 +5,24 @@ import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestE
 import { HTTPAccessDeniedError } from "../utils/error_handling/src/HTTPAccessDeniedError"
 import { HTTPNotFoundError } from "../utils/error_handling/src/HTTPNotFoundError"
 import httpStatusCodes from "../utils/error_handling/configs/httpStatusCodes"
-import { createNewActivityTask } from "./activity.manager"
+import { createNewActivityTask, getActivityByIdTask } from "./activity.manager"
+import pick from "lodash.pick"
 
-export async function getActivity() {
+export async function getActivity(req: Request, res: Response, next: NextFunction) {
+    try {
+        const activityId = Number(req.params.id);
+        const newcomer = await getActivityByIdTask(activityId);
 
+        activityLogger.log("info",`Retrieved newcomer id: ${activityId}`);
+        
+        const publicFields = ["id", "activityDate", "type", "newcomer","admins"]
+        const publicNewcomerData = pick(newcomer, publicFields);
+
+        return res.json(publicNewcomerData);
+    } catch (error: any) {
+        activityLogger.log("error", error);
+        return next(error);
+    }
 }
 
 export async function deleteActivity() {
@@ -35,7 +49,7 @@ export async function createActivity(req: Request, res: Response, next: NextFunc
 
         const newActivity = await createNewActivityTask(data);
 
-        activityLogger.log("info",`${data.email} created`);
+        activityLogger.log("info",`Activity ${newActivity.id} created`);
 
         const response = {
             "Message": "Activity added",
