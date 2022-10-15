@@ -5,7 +5,7 @@ import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestE
 import { HTTPAccessDeniedError } from "../utils/error_handling/src/HTTPAccessDeniedError"
 import { HTTPNotFoundError } from "../utils/error_handling/src/HTTPNotFoundError"
 import httpStatusCodes from "../utils/error_handling/configs/httpStatusCodes"
-import { createNewActivityTask, getActivityByIdTask, patchActivityByIdTask } from "./activity.manager"
+import { createNewActivityTask, getActivityByIdTask, patchActivityByIdTask, removeActivityTask } from "./activity.manager"
 import pick from "lodash.pick"
 
 export async function getActivity(req: Request, res: Response, next: NextFunction) {
@@ -25,8 +25,24 @@ export async function getActivity(req: Request, res: Response, next: NextFunctio
     }
 }
 
-export async function deleteActivity() {
+export async function deleteActivity(req: Request, res: Response, next: NextFunction) {
+    try {
+        const activityId = Number(req.params.id);
+        
+        const removedActivity = await removeActivityTask(activityId);
+
+        activityLogger.log("info",`Removed activity id: ${removedActivity.id}`)
     
+        const response = {
+            "Message": "Activity removed",
+            "Newcomer id": `${removedActivity.id}`,
+        }
+    
+        return res.json(response).status(httpStatusCodes.OK);
+    } catch (error: any) {
+        activityLogger.log("error", error);
+        return next(error);
+    }
 }
 
 export async function patchActivity(req: Request, res: Response, next: NextFunction) {

@@ -10,7 +10,6 @@ import { getMultipleUserByIds } from "../user/user.manager"
 import { ActivityRequest } from "./activity.types"
 
 const activityRepository = AppDataSource.getRepository(Activity);
-const userRepository = AppDataSource.getRepository(User);
 
 export async function createNewActivityTask(data: ActivityRequest): Promise<Activity> {
     try {
@@ -81,6 +80,20 @@ export async function patchActivityByIdTask(activityId: number, data: ActivityRe
         throw new HTTPInternalSeverError("Error when patching activity");
     }
 
+}
+
+export async function removeActivityTask(activityId: number): Promise<Activity> {
+    try {
+        const activity = await getActivityByIdTask(activityId);
+
+        activity.deleted = true;
+        const deletedActivity = await activityRepository.save(activity);
+        return deletedActivity;
+
+    } catch(error: any) {
+        activityLogger.log("error",`${error}`);
+        throw new HTTPInternalSeverError("Error when deleting activity");
+    }
 }
 
 async function setActivityData(activity: Activity, data: ActivityRequest) {
