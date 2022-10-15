@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToMany, OneToMany, OneToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToMany, OneToMany, OneToOne, JoinTable } from "typeorm"
 import { Newcomer } from "../../newcomer/entity/Newcomer"
 import { User } from "../../user/entity/User"
 
@@ -26,7 +26,8 @@ export class Activity extends BaseEntity {
     @OneToOne(() => Newcomer, (newcomer) => newcomer.activity)
     newcomer: Newcomer
 
-    @ManyToMany(() => User, (user) => user.activity)
+    @ManyToMany(() => User, (admins) => admins.activity)
+    @JoinTable()
     admins: User[]
 }
 
