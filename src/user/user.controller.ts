@@ -1,6 +1,6 @@
 import userLogger from "./user.logger"
 import { Request, Response, NextFunction } from 'express';
-import { getUserById, createUser, removeUser, updateUser, getUserByEmail, login, getMultipleUserByIds } from "./user.manager"
+import { getUserById, createUser, removeUser, updateUser, getUserByEmail, login, getMultipleUserByIds, refresh } from "./user.manager"
 import { completeKeys, isWhiteListed } from "../utils/utils"
 import { HTTPBadRequestError } from "../utils/error_handling/src/HTTPBadRequestError"
 import { HTTPAccessDeniedError } from "../utils/error_handling/src/HTTPAccessDeniedError"
@@ -152,19 +152,35 @@ export async function profilelogin(req: Request, res: Response, next: NextFuncti
             return next(new HTTPNotFoundError(`User ${data.email} does not exist`));
         }
 
-        const token = await login(user, data.password);
+        const tokens = await login(user, data.password);
 
-        if (!token) {
+        if (!tokens) {
             return next(new HTTPAccessDeniedError("Wrong password or email"));
         }
 
         userLogger.log("info",`${user.email} logged in`);
 
-        const response = {
-            "Access token": token,
+        return res.json(tokens).status(httpStatusCodes.OK);
+    } catch (error: any) {
+        userLogger.log("error", error);
+        return next(error);
+    }
+}
+
+export async function refreshToken(req: Request, res: Response, next: NextFunction) {
+    try {
+        const data = req.body;
+
+        const keyFields = ["refreshToken"];
+
+        if (!completeKeys(keyFields,data)) {
+            return next(new HTTPBadRequestError("Incomplete data"));
         }
 
-        return res.json(response).status(httpStatusCodes.OK);
+        const tokens = await refresh(data.refreshToken);
+
+        return res.json(tokens).status(httpStatusCodes.OK);
+
     } catch (error: any) {
         userLogger.log("error", error);
         return next(error);
