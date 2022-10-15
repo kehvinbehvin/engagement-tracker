@@ -10,7 +10,6 @@ import { getMultipleUserByIds } from "../user/user.manager"
 import { ActivityRequest } from "./activity.types"
 
 const activityRepository = AppDataSource.getRepository(Activity);
-const userRepository = AppDataSource.getRepository(User);
 
 export async function createNewActivityTask(data: ActivityRequest): Promise<Activity> {
     try {
@@ -31,13 +30,29 @@ export async function createNewActivityTask(data: ActivityRequest): Promise<Acti
 export async function getActivityByIdTask(activtyId: number): Promise<Activity> {
     try {
         const activity = await activityRepository.findOne({
+            select: {
+                id: true,
+                admins: {
+                    id: true,
+                    firstName: true,
+                    email: true,
+                },
+                newcomer: {
+                    id: true,
+                    firstName: true,
+                    email: true,
+                },
+                activityDate: true,
+                type: true,
+            },
             where: {
                 id: activtyId,
+                deleted: false,
             },
             relations: {
                 admins: true,
                 newcomer: true,
-            },
+            }
         })
 
         if (!activity) {
@@ -52,13 +67,41 @@ export async function getActivityByIdTask(activtyId: number): Promise<Activity> 
     }
 }
 
+export async function patchActivityByIdTask(activityId: number, data: ActivityRequest): Promise<Activity> {
+    try {
+        const activity = await getActivityByIdTask(activityId);
+
+        const updatedActivity = await setActivityData(activity, data);
+
+        return updatedActivity;
+
+    } catch(error: any) {
+        activityLogger.log("error",`${error}`);
+        throw new HTTPInternalSeverError("Error when patching activity");
+    }
+
+}
+
+export async function removeActivityTask(activityId: number): Promise<Activity> {
+    try {
+        const activity = await getActivityByIdTask(activityId);
+
+        activity.deleted = true;
+        const deletedActivity = await activityRepository.save(activity);
+        return deletedActivity;
+
+    } catch(error: any) {
+        activityLogger.log("error",`${error}`);
+        throw new HTTPInternalSeverError("Error when deleting activity");
+    }
+}
+
 async function setActivityData(activity: Activity, data: ActivityRequest) {
 
     if (data.newcomerId) {
         const newcomerId = data.newcomerId
         const newcomer = await getNewcomerByIdTask(newcomerId);
-        activity.newcomer = newcomer
-        
+        activity.newcomer = [newcomer]
     }
 
     if (data.type) {
@@ -73,44 +116,23 @@ async function setActivityData(activity: Activity, data: ActivityRequest) {
 
     if (data.activityDate) {
         activity.activityDate = data.activityDate;
-        
     }
-
-    await activityRepository.save(activity);
-    activityLogger.log("info",`Saved normal columns`);
 
     // Relationships
     if (data.adminIds) {
         const adminIds = data.adminIds
         const admins = await getMultipleUserByIds(adminIds);
 
-        if (activity.admins) {
-            activity.admins.push(...admins)
-        } else {
-            activity.admins = admins
-        }
-        activityLogger.log("info",`Saving activity admins`);
-
-        await activityRepository.save(activity);
-
-        for (const admin of admins) {
-            activityLogger.log("info",`Saving admin side${activity.id}`);
-            try {
-                if (admin.activity) {
-                    admin.activity.push(activity);
-                } else {
-                    admin.activity = [activity];
-                }
-                
-                await userRepository.save(admin);
-
-            } catch (error: any) {
-                activityLogger.log("error",`${error}`);
-                throw new HTTPInternalSeverError("Error when setting activity data");
-
-            }
-        }
+        activity.admins = admins
     }
 
-    return activity;
+    try {
+        const updatedActivity = await activityRepository.save(activity);
+
+        return updatedActivity;
+
+    } catch (error: any) {
+        activityLogger.log("error",`${error}`);
+        throw new HTTPInternalSeverError("Error when setting activity data");
+    }
 }

@@ -29,13 +29,15 @@ const port = process.env.PORT;
 //   }
 
 // app.use(cors());
+
 app.use(express.json());
 app.use(routeLogger);
-app.use(errorHandler);
 
 userRoutes(app)
 newcomerRoutes(app)
 activityRoutes(app)
+
+app.use(errorHandler);
 
 AppDataSource.initialize().then(async () => {
     logger.log("info","Database connected")
