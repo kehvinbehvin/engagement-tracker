@@ -21,4 +21,6 @@
 - docker push kehvinbehvin/engagement-tracker:latest
 
 # Modules descriptions
-
+Users are admins that must register/login to access the platform. These users can add/edit/remove
+newcomers from the system. Activities are units of engagement that newcomers experience in real life 
+that can recorded in the system by adding/editing/removing an activity to/from a newcomer by an admin.
